@@ -82,13 +82,16 @@ const puppeteer = require('puppeteer');
       page.waitForNavigation()
   ]);
   console.log('admin 登录成功');
-  const item = await page.$('.tpl-item[no="NO:298"] img');
+
 
   await Promise.all([
     page.click('.tpl-item[no="NO:298"] img'),
     page.waitForNavigation()
   ]);
-  await page.screenshot({path:'login.jpg', quality: 100});
+  const item = await page.$('.canvas.v-section:not(:first-child)');
+    await page.waitFor(2500);
+  const items = await item.$('div[data-name=crotch]');
+  await items.screenshot({path:'login.jpg', quality: 100});
   await page.close();
   await browser.close();
 })();
