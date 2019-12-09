@@ -2,7 +2,23 @@ const puppeteer = require('puppeteer');
 // const devices = require('puppeteer/DeviceDescriptors');
 const nodemailer = require('nodemailer'); //发送邮件的node插件
 // const iPhone = devices['iPhone X'];
-
+const argv = process.argv
+if (argv.length <= 2) {
+  console.log('请指定待处理的项目名称')
+  return
+}
+const projectUrl = {
+  'kkmob': 'kkmob.weshineapp.com-online',
+  'haipei': 'haipei.weshineapp.com-online',
+  'ttmob': 'ttmob.weshineapp.com-online',
+  'wemoji': 'wemoji.weshineapp.com-test'
+}
+console.log(argv[2]);
+const curUrl = projectUrl[argv[2]];
+if (!curUrl) {
+  console.log('项目名称不在配置范围内，请重新配置');
+  return;
+}
 // 模拟用户登录
 (async () => {
   const browser = await puppeteer.launch();
@@ -23,12 +39,12 @@ const nodemailer = require('nodemailer'); //发送邮件的node插件
   console.log('admin 登录成功');
 
 
-  let target = await page.$('.model-link.inside[href="job/frontend.kkmob.weshineapp.com-online/"]');
+  let target = await page.$('.model-link.inside[href="job/frontend.' + curUrl + '/"]');
   await Promise.all([
     target.click(),
     page.waitForNavigation()
   ]);
-  let link = await page.$('.task-link[href="/job/frontend.kkmob.weshineapp.com-online/build?delay=0sec"]');
+  let link = await page.$('.task-link[href="/job/frontend.' + curUrl + '/build?delay=0sec"]');
   link.click();
   console.log('点击构建成功');
   await page.waitFor(2500);
@@ -42,7 +58,7 @@ const nodemailer = require('nodemailer'); //发送邮件的node插件
     } else {
       console.log('-------------------- 构建中 --------------------');
     }
-  }, 2000);
+  }, 3000);
 
   let transporter = nodemailer.createTransport({
     service: 'QQ', // 发送者的邮箱厂商，支持列表：https://nodemailer.com/smtp/well-known/
@@ -58,7 +74,7 @@ const nodemailer = require('nodemailer'); //发送邮件的node插件
     from: 'chenft <625027428@qq.com>', // 发送者昵称和地址
     to: '625027428@qq.com', // 接收者的邮箱地址
     subject: 'puppeteer', // 邮件主题
-    html: '<div>构建成功！</div>',
+    html: `<div>${argv[2]} 构建成功！</div>`,
     // attachments: [{
     //   filename: 'mryx.jpg',
     //   path: './mryx.jpg',
@@ -66,15 +82,15 @@ const nodemailer = require('nodemailer'); //发送邮件的node插件
     // }]
   };
 
-  function buildSuccess() {
+  function buildSuccess () {
     //发送邮件
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-      return console.log(error);
-      }
-      console.log('邮件发送成功 ID：', info.messageId);
+    transporter.sendMail(mailOptions, async (error, info) => {
       await page.close();
       await browser.close();
+      if (error) {
+        return console.log(error);
+      }
+      console.log('邮件发送成功 ID：', info.messageId);
     });
   }
 })();

@@ -27,7 +27,7 @@ function rename (oldPath, newPath) {
 walk(PATH, function (path, fileName) {
   console.log(fileName, path);
     var oldPath = path + '/' + fileName, // 源文件路径
-        newPath = path + '/landing_'+ fileName.replace('.png', '.jpg'); // 新路径
+        newPath = '../../ishion/kkmob-weshineapp-com/src/pages/landing/imgs/landing_'+ fileName.replace('.png', '.jpg'); // 新路径
         console.log(oldPath, newPath);
     rename(oldPath, newPath);
 });
