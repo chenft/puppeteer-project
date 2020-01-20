@@ -31,8 +31,10 @@ if (!curUrl) {
   await page.goto('http://jenkins.weshineapp.com');
   //输入账号密码
   const uniqueIdElement = await page.$('.formRow #j_username[name=j_username]');
-  await uniqueIdElement.type('chenfengting', {delay: 20});
-  const passwordElement = await page.$('.formRow input[name=j_password]', {delay: 20});
+  // await uniqueIdElement.type('chenfengting', {delay: 20});
+  // const passwordElement = await page.$('.formRow input[name=j_password]', {delay: 20});
+  await uniqueIdElement.type('chenfengting');
+  const passwordElement = await page.$('.formRow input[name=j_password]');
   await passwordElement.type('123456');
   //点击确定按钮进行登录
   let okButtonElement = await page.$('.formRow input.submit-button[name=Submit');
@@ -52,13 +54,23 @@ if (!curUrl) {
   let link = await page.$('.task-link[href="/job/frontend.' + curUrl + '/build?delay=0sec"]');
   link.click();
   console.log('点击构建成功');
+  const startTime = new Date();
   await page.waitFor(2500);
   var stopBtn = await page.$('.build-controls .build-stop');
+  let endStart;
+  let duration;
+  var minutes;
+  var seconds;
   let _interval = setInterval(async () => {
     stopBtn = await page.$('.build-controls .build-stop');
     if (stopBtn == null) {
       _interval = clearInterval(_interval);
+      endStart = new Date();
+      duration = endStart - startTime;
+      minutes = parseInt((duration % (1000 * 60 * 60)) / (1000 * 60));
+      seconds = parseInt((duration % (1000 * 60)) / 1000);
       console.log('==================== 构建成功！====================');
+      console.log(`==================== duration: ${minutes}分 ${seconds}秒 ====================`);
       buildSuccess();
     } else {
       console.log('-------------------- 构建中 --------------------');
@@ -98,7 +110,7 @@ if (!curUrl) {
     //   console.log('邮件发送成功 ID：', info.messageId);
     // });
     var post_data = {
-      text: `<div>${argv[2]} 构建成功！</div>`,
+      text: `<div>${argv[2]} 构建成功！</div><p>duration: ${minutes}分 ${seconds}秒 </p>`,
       desp: '噜啦噜啦嘞'
     };
     var content = qs.stringify(post_data);
